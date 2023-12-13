@@ -101,8 +101,9 @@ window.addEventListener('DOMContentLoaded', () => {
     
     modalTrigger.forEach(btn => {
         btn.addEventListener('click', () => {
-            modal.classList.add('show'); // добавляем класс показа блока
-            document.body.style.overflow = 'hidden'; // отключаем возможность прокрутки страницы во время открытого модалього окна
+           // modal.classList.add('show'); // добавляем класс показа блока
+            //document.body.style.overflow = 'hidden'; // отключаем возможность прокрутки страницы во время открытого модалього окна
+            openModal(); // используем созданную функцию
         });
     });
 
@@ -127,6 +128,21 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const modalTimerId = setTimeout(openModal, 15000); //Появление модального окна через 15 секунд
+    function openModal() {
+        modal.classList.add('show'); 
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimerId); // исключение повторного открытия
+    }
+
+    function showModalByScroll() {
+        if(window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) { // вместо scrollYу можно использовать pageYOffset для поддержки старых версий браузеров
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+    window.addEventListener('scroll', showModalByScroll);
+    
     
     // CLASS
 
