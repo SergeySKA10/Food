@@ -221,7 +221,9 @@ window.addEventListener('DOMContentLoaded', () => {
           };
     forms.forEach(item => postData(item));
 
-    function postData(form) {
+    //Функция при использовании XMLHttpRequest
+
+    /*function postData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -237,11 +239,11 @@ window.addEventListener('DOMContentLoaded', () => {
             request.open('POST', 'server.php');
            // request.setRequestHeader('Content-type', 'application/json'); // при использовании формата JSON
            const fromData = new FormData(form);
-           /*const object = {}; // для формата JSON
-           fromData.forEach(function(value, key) {
-            object[key] = value;
-           });
-           const json = JSON.stringify(object);*/
+           //const object = {}; // для формата JSON
+           //fromData.forEach(function(value, key) {
+           // object[key] = value;
+           //});
+           //const json = JSON.stringify(object);
            request.send(fromData); // если формат JSON, то fromData меняем на json
            request.addEventListener('load', () => {
             if(request.status === 200) {
@@ -254,7 +256,49 @@ window.addEventListener('DOMContentLoaded', () => {
             }
            });
         });
+    }*/
+
+    //Функция при использовании Fetch API
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const statusMessage = document.createElement('img'); // добавление нового блока
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `
+            form.insertAdjacentElement('afterend', statusMessage);
+
+            const fromData = new FormData(form);
+            const object = {}; // для формата JSON
+            fromData.forEach(function(value, key) {
+                object[key] = value;
+            });
+            fetch('server.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                }, 
+                body: JSON.stringify(object)
+            })
+            .then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(message.success);
+            })
+            .catch(() => {
+                showThanksModal(message.failure);
+            })
+            .finally(() => {
+                statusMessage.remove();
+                form.reset();
+            })
+        })
     }
+   
 
     function showThanksModal(message) { // создаем функцию показа благодарнсти для пользователя
         const prevModalDisplay = document.querySelector('.modal__dialog'); // получаем элемент модального окна с контентом для его использования, чтобы не создавать новую верстку
