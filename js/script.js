@@ -182,7 +182,43 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new MenuCard( // создаем карточки используя JS. После создания удаляем карточки из HTML -> теперь все карточки (включая вновь созданные) будут созданы из одного класса (шаблона)
+    const getResource = async (url) => {  // создаем функцию для создания карточек. GET запрос с db.json для формирования внутренностей. Карточка создается на соновании класса MenuCard
+        const menu = await fetch(url); // используем fetch
+        if(!menu.ok) { // создаем ошибку в случае статуса 400 ... , 500 .... и т.п.
+            throw new Error (`Could not fetch ${url}, status: ${menu.status}`)
+        }
+        return await menu.json();
+    }
+
+    getResource('http://localhost:3000/menu') // вызывем функцию и обрабатываем результат
+        .then(data => {
+            data.forEach(({img, altimg, title, descr, price}) => { // деструктуризируем объект полуенный из db.json для передачи в качестве аргуметов
+               new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
+    /*getResource('http://localhost:3000/menu') // => Использование функции для формирования карточек без использования классов
+        .then(data => createCard(data));
+    
+    function createCard(data) {
+        data.forEach(({img, altimg, title, descr, price}) => {
+            const element = document.createElement('div');
+            element.classList.add('menu__item');
+            element.innerHTML = `
+                <img src=${img} alt=${altimg}>
+                <h3 class="menu__item-subtitle">${title}</h3>
+                <div class="menu__item-descr">${descr}</div>
+                <div class="menu__item-price">
+                    <div class="menu__item-cost">Цена:</div>
+                    <div class="menu__item-total"><span>${price}</span> $/день</div>
+                </div> 
+            `;
+            document.querySelector('.menu .container').append(element); 
+        });
+    }
+    
+
+    /*new MenuCard( // создаем карточки используя JS. После создания удаляем карточки из HTML -> теперь все карточки (включая вновь созданные) будут созданы из одного класса (шаблона)
         "img/tabs/vegy.jpg",
         "vegy",
         'Меню "Фитнес"',
@@ -209,7 +245,7 @@ window.addEventListener('DOMContentLoaded', () => {
         14,
         '.menu .container',
         'menu__item'
-    ).render(); 
+    ).render(); */
 
     //FORMS
 
@@ -219,7 +255,8 @@ window.addEventListener('DOMContentLoaded', () => {
             success: 'Спасибо! Скоро мы свяжемся с Вами',
             failure: 'Что-то не так'
           };
-    forms.forEach(item => postData(item));
+    forms.forEach(item => bindPostData(item));
+
 
     //Функция при использовании XMLHttpRequest
 
@@ -260,7 +297,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //Функция при использовании Fetch API
 
-    function postData(form) {
+    const postData = async (url, data) => { // создаем фунцию для POST запроса отправки формы
+        const res = await fetch(url, {
+           method: 'POST',
+           headers: {
+            'Content-type': 'application/json'
+           },
+           body: data 
+        });
+
+       if(!res.ok) { // создаем ошибку в случае статуса 400 ... , 500 .... и т.п.
+            throw new Error (`Could not fetch ${url}, status: ${res.status}`)
+        }
+        
+        return await res.json(); // возвращаем результат через метод json()
+    }
+    
+    function bindPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -272,19 +325,11 @@ window.addEventListener('DOMContentLoaded', () => {
             `
             form.insertAdjacentElement('afterend', statusMessage);
 
-            const fromData = new FormData(form);
-            const object = {}; // для формата JSON
-            fromData.forEach(function(value, key) {
-                object[key] = value;
-            });
-            fetch('server.php', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                }, 
-                body: JSON.stringify(object)
-            })
-            .then(data => data.text())
+            const formData = new FormData(form);
+
+            const json = JSON.stringify(Object.fromEntries(formData.entries())); // преобразуем formData в json формат
+
+           postData('http://localhost:3000/requests', json) // вызываем функцию и обрабатываем результат
             .then(data => {
                 console.log(data);
                 showThanksModal(message.success);
