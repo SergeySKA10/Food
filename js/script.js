@@ -182,7 +182,18 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const getResource = async (url) => {  // создаем функцию для создания карточек. GET запрос с db.json для формирования внутренностей. Карточка создается на соновании класса MenuCard
+    // Использование AXIOS библиотеки для GET запроса
+
+    axios.get('http://localhost:3000/menu')
+        .then(data => {
+            data.data.forEach(({img, altimg, title, descr, price}) => {
+               new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
+    // Использование FETCH && ASYNC AWAIT for GET запроса    
+
+    /*const getResource = async (url) => {  // создаем функцию для создания карточек. GET запрос с db.json для формирования внутренностей. Карточка создается на соновании класса MenuCard
         const menu = await fetch(url); // используем fetch
         if(!menu.ok) { // создаем ошибку в случае статуса 400 ... , 500 .... и т.п.
             throw new Error (`Could not fetch ${url}, status: ${menu.status}`)
@@ -197,7 +208,10 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-    /*getResource('http://localhost:3000/menu') // => Использование функции для формирования карточек без использования классов
+
+    // => Использование функции для формирования карточек без использования классов
+
+    /*getResource('http://localhost:3000/menu') 
         .then(data => createCard(data));
     
     function createCard(data) {
@@ -217,6 +231,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Обычное создание карточек 
 
     /*new MenuCard( // создаем карточки используя JS. После создания удаляем карточки из HTML -> теперь все карточки (включая вновь созданные) будут созданы из одного класса (шаблона)
         "img/tabs/vegy.jpg",
@@ -243,7 +258,7 @@ window.addEventListener('DOMContentLoaded', () => {
         'Меню "Постное"',
         'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
         14,
-        '.menu .container',
+        '.menu .container', A
         'menu__item'
     ).render(); */
 
