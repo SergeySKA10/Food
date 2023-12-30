@@ -381,4 +381,60 @@ window.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // Slider
+
+    const sliders = document.querySelectorAll('.offer__slide'),
+          arrowLeft = document.querySelector('.offer__slider-prev'),
+          arrowRight = document.querySelector('.offer__slider-next'),
+          arrows = document.querySelector('.offer__slider-counter'),
+          current = document.querySelector('#current'),
+          total = document.querySelector('#total');
+    
+    let index = 1; // создаем индекс для переключения слайдов
+
+    if(sliders.length < 10) { // условия добавления 0 в тотал
+        total.textContent = `0${sliders.length}`;
+    } else {
+        total.textContent = sliders.length;
+    }
+
+    function showSlides (n) { // создаем функцию показа слайда и скрытия других слайдов с изменением счетчика слайдов
+        if(n > sliders.length) {
+            index = 1;
+        }
+        if(n < 1) {
+            index = sliders.length;
+        }
+
+        sliders.forEach(item => item.classList.add('hide'));
+
+        sliders[index - 1].classList.remove('hide');
+        sliders[index - 1].classList.add('show');
+
+
+        if(sliders.length < 10) {
+            current.textContent = `0${index}`;
+        } else {
+            current.textContent = index;
+        }
+
+    }
+
+    showSlides(index); // вызываем функцию
+
+    function plusSlides(n) { // функция перелистывания слайда
+        showSlides(index += n); // n придет из обработчиков события
+    }
+
+    arrows.addEventListener('click', (e) => {
+        if(e.target == arrowRight) {
+            plusSlides(1);
+        } else if (e. target == arrowLeft) {
+            plusSlides(-1);
+        }
+    }); 
+
+
+
+
 });
