@@ -388,9 +388,14 @@ window.addEventListener('DOMContentLoaded', () => {
           arrowRight = document.querySelector('.offer__slider-next'),
           arrows = document.querySelector('.offer__slider-counter'),
           current = document.querySelector('#current'),
-          total = document.querySelector('#total');
+          total = document.querySelector('#total'),
+          slidersWrapper = document.querySelector('.offer__slider-wrapper'),
+          slidesField = document.querySelector('.offer__slider-inner'),
+          width = window.getComputedStyle(slidersWrapper).width;
+          //block = 
     
-    let index = 1; // создаем индекс для переключения слайдов
+    // Slider вариант 1. Простой
+    /*let index = 1; // создаем индекс для переключения слайдов
 
     if(sliders.length < 10) { // условия добавления 0 в тотал
         total.textContent = `0${sliders.length}`;
@@ -432,9 +437,70 @@ window.addEventListener('DOMContentLoaded', () => {
         } else if (e. target == arrowLeft) {
             plusSlides(-1);
         }
-    }); 
+    }); */
 
+    //Slider вариант 2
 
+    // - назначение inline styles
+    slidesField.style.width = 100 * sliders.length + '%'; // ширина = количеству слайдов * 100 %
+    slidesField.style.display = 'flex'; // в одну линию используем flex
+    slidesField.style.transition = '0.5s all'; // изменение с задержкой в пол секунды
+    slidersWrapper.style.overflow = 'hidden'; // все что не попадает в диапазон wrapper будет скрыто, т.е. оставляем один слайд в окне, остальные не видны
+    sliders.forEach(slide => slide.style.width = width); // ширина каждого стайда = ширине wrapper окна
 
+    let slideIndex = 1, // индекс для пролистывания
+        offset = 0; // индекс отсупа влево
+
+    if(sliders.length < 10) { // условия добавления 0 в тотал
+        total.textContent = `0${sliders.length}`;
+        current.textContent = `0${slideIndex}`;
+    } else {
+        total.textContent = sliders.length;
+        current.textContent = slideIndex;
+    }
+    
+    arrows.addEventListener('click', (e) => { 
+        if(e.target == arrowRight) { // движение вправо
+            if(offset == +width.slice(0, width.length - 2) * (sliders.length - 1)) {  // если offset = ширине * конечный индекс в массиве
+                offset = 0;
+            } else {
+                offset += +width.slice(0, width.length - 2); // увеличиваем на шинрину слайда
+            }
+            slidesField.style.transform = `translateX(-${offset}px)`; // двигаем слайд
+
+            if(slideIndex == sliders.length) { // условия для счетчика слайдера
+                slideIndex = 1;
+            } else {
+                slideIndex++;
+            }
+
+            if(sliders.length < 10) {
+                current.textContent = `0${slideIndex}`; // условие для показа счетчика
+            } else {
+                current.textContent = slideIndex;
+            }
+        }
+        if(e. target == arrowLeft) { // движение влево, тоже самое но наоборот
+            if(offset == 0) {
+                offset = +width.slice(0, width.length - 2) * (sliders.length - 1);
+            } else {
+                offset -= +width.slice(0, width.length - 2);
+            }
+            slidesField.style.transform = `translateX(-${offset}px)`;
+
+            if(slideIndex == 1) {
+                slideIndex = sliders.length;
+            } else {
+                slideIndex--;
+            }
+
+            if(sliders.length < 10) {
+                current.textContent = `0${slideIndex}`;
+            } else {
+                current.textContent = slideIndex;
+            }
+        }
+
+    });
 
 });
