@@ -38,7 +38,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //Timer
 
-    const deadline = '2024-01-01'; // создаем дедлайн
+    const deadline = '2025-01-01'; // создаем дедлайн
 
     function getTimeRemaining(endtime) {  // создаем функцию которая будет определять разницу между настоящим временем и дедлайном(endtime)
         const t = Date.parse(endtime) - Date.parse(new Date());
@@ -392,7 +392,7 @@ window.addEventListener('DOMContentLoaded', () => {
           slidersWrapper = document.querySelector('.offer__slider-wrapper'),
           slidesField = document.querySelector('.offer__slider-inner'),
           width = window.getComputedStyle(slidersWrapper).width;
-          //block = 
+         
     
     // Slider вариант 1. Простой
     /*let index = 1; // создаем индекс для переключения слайдов
@@ -458,6 +458,14 @@ window.addEventListener('DOMContentLoaded', () => {
         total.textContent = sliders.length;
         current.textContent = slideIndex;
     }
+
+    function currentAddNull(condition, number) { // функция для добавления '0'
+        if(condition < 10) {
+            current.textContent = `0${number}`; // условие для показа счетчика
+        } else {
+            current.textContent = number;
+        }
+    }
     
     arrows.addEventListener('click', (e) => { 
         if(e.target == arrowRight) { // движение вправо
@@ -474,11 +482,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 slideIndex++;
             }
 
-            if(sliders.length < 10) {
-                current.textContent = `0${slideIndex}`; // условие для показа счетчика
-            } else {
-                current.textContent = slideIndex;
-            }
+            currentAddNull(sliders.length, slideIndex);
+            opacityItem(dots);
         }
         if(e. target == arrowLeft) { // движение влево, тоже самое но наоборот
             if(offset == 0) {
@@ -494,13 +499,68 @@ window.addEventListener('DOMContentLoaded', () => {
                 slideIndex--;
             }
 
-            if(sliders.length < 10) {
-                current.textContent = `0${slideIndex}`;
-            } else {
-                current.textContent = slideIndex;
-            }
+            currentAddNull(sliders.length, slideIndex);
+            opacityItem(dots); // вызывем функцию изменения стиля opacity
         }
 
     });
+
+    // DOTS indication
+    
+    const sliderBlock = document.querySelector('.offer__slider'),
+          dots = []; // создаем массив для помещения dot
+    sliderBlock.style.position = 'relative'; // так как обертка навигации юудет абсолютно спозициронированна по отношению к sliderBlock  
+
+    const indication = document.createElement('ul');
+    indication.classList.add('carousel-indicators');
+    indication.style.cssText = `
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 15;
+            display: flex;
+            justify-content: center;
+            margin-right: 15%;
+            margin-left: 15%;
+            list-style: none;
+        `;
+    sliderBlock.append(indication);
+
+    for(let i = 0; i < sliders.length; i++) { // с помощью цикла создаем точки
+        const dot = document.createElement('li');
+        dot.setAttribute('data-slide-to', i+1);
+        dot.classList.add('dot');
+        if(i == 0) {
+            dot.style.opacity = 1;
+        }
+        indication.append(dot);
+        
+        dots.push(dot);
+        
+    }
+
+    function opacityItem(array) { // функция для выделения точки
+        array.forEach(item => item.style.opacity = '.5');
+        array[slideIndex-1].style.opacity = 1;
+    }
+
+    dots.forEach(dot => { // перебираем и на каждую отдельную кнопку повешиваем обработчик чтобы переключаться между слайдами с помощью точек-навигации
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to');
+
+            slideIndex = slideTo;
+            offset = +width.slice(0, width.length - 2) * (slideTo - 1);
+
+            slidesField.style.transform = `translateX(-${offset}px)`;
+            opacityItem(dots);
+            currentAddNull(sliders.length, slideIndex);
+
+        })
+    })
+    
+
+   
+
 
 });
