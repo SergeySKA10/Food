@@ -459,6 +459,10 @@ window.addEventListener('DOMContentLoaded', () => {
         current.textContent = slideIndex;
     }
 
+    function deleteNotDigits(str) { // функция преобразования строки в число. будет использоваться для width
+        return +str.replace(/\D/g, ''); 
+    } 
+
     function currentAddNull(condition, number) { // функция для добавления '0'
         if(condition < 10) {
             current.textContent = `0${number}`; // условие для показа счетчика
@@ -469,10 +473,10 @@ window.addEventListener('DOMContentLoaded', () => {
     
     arrows.addEventListener('click', (e) => { 
         if(e.target == arrowRight) { // движение вправо
-            if(offset == +width.slice(0, width.length - 2) * (sliders.length - 1)) {  // если offset = ширине * конечный индекс в массиве
+            if(offset == deleteNotDigits(width) * (sliders.length - 1)) {  // если offset = ширине * конечный индекс в массиве
                 offset = 0;
             } else {
-                offset += +width.slice(0, width.length - 2); // увеличиваем на шинрину слайда
+                offset += deleteNotDigits(width); // увеличиваем на шинрину слайда
             }
             slidesField.style.transform = `translateX(-${offset}px)`; // двигаем слайд
 
@@ -487,9 +491,9 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         if(e. target == arrowLeft) { // движение влево, тоже самое но наоборот
             if(offset == 0) {
-                offset = +width.slice(0, width.length - 2) * (sliders.length - 1);
+                offset = deleteNotDigits(width) * (sliders.length - 1);
             } else {
-                offset -= +width.slice(0, width.length - 2);
+                offset -= deleteNotDigits(width);
             }
             slidesField.style.transform = `translateX(-${offset}px)`;
 
@@ -550,15 +554,120 @@ window.addEventListener('DOMContentLoaded', () => {
             const slideTo = e.target.getAttribute('data-slide-to');
 
             slideIndex = slideTo;
-            offset = +width.slice(0, width.length - 2) * (slideTo - 1);
+            offset = deleteNotDigits(width) * (slideTo - 1);
 
             slidesField.style.transform = `translateX(-${offset}px)`;
             opacityItem(dots);
             currentAddNull(sliders.length, slideIndex);
 
-        })
-    })
-    
+        });
+    });
+
+    // Calc
+
+    const result = document.querySelector('.calculating__result span'); // получение элемена, где будет размещен результат
+    let sex, height, weight, age, ratio; // переменные которые будут заданы пользователем
+
+    if(localStorage.getItem('sex')) { // установка изначальных значений пола и активности, использование localStorage
+        sex = localStorage.getItem('sex');
+    } else {
+        sex = 'female';
+        localStorage.setItem('sex', 'female');
+    }
+
+    if(localStorage.getItem('ratio')) {
+        ratio = localStorage.getItem('ratio');
+    } else {
+        ratio = 1.375;
+        localStorage.setItem('ratio', 1.375);
+    }
+
+    function initLocalSetting(selector, activeClass) { // функция по применению localStorage для сохранения настроек пользователя
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.classList.remove(activeClass);
+
+            if(elem.getAttribute('id') === localStorage.getItem('sex')) {
+                elem.classList.add(activeClass);
+            }
+            
+            if(elem.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+
+    initLocalSetting('#gender div', 'calculating__choose-item_active');
+    initLocalSetting('.calculating__choose_big div', 'calculating__choose-item_active');
+
+
+    function calcTotal() { // функция расчета езультата
+        if(!sex || !height || !weight || !age || !ratio) {
+            result.textContent = '____';
+            return;
+        }
+        if(sex === 'female'){
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+        } else {
+            result.textContent =  Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+        }
+
+    }
+    calcTotal();
+
+    function getStaticInformation(parentSelector, activeClass) { // функция по получению элементов на которые пользователь кликает и получению их значений
+        const elements = document.querySelectorAll(`${parentSelector} div`);
+
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                if(e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio'); // получение значения ratio
+                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio'));
+                } else {
+                    sex = e.target.getAttribute('id'); // получение значения sex
+                    localStorage.setItem('sex', e.target.getAttribute('id'));
+                }
+
+                elements.forEach(elem => elem.classList.remove(activeClass)); // удаление классов активности и далее добавление класса активности выбранному элементу
+
+                e.target.classList.add(activeClass);
+                console.log(ratio, sex);
+                calcTotal();
+            })
+        });
+    }
+
+    getStaticInformation('#gender', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big', 'calculating__choose-item_active');
+
+    function getDynamicInformation(selector) { // функция по получению вводимых значений пользователем
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {
+            if(input.value.match(/\D/g)) { // проверка на ввод чисел
+                input.style.border = '2px solid red';
+            } else {
+                input.style.border = 'none';
+            }
+            switch(input.getAttribute('id')) {
+                case 'height':
+                    height = +input.value;
+                    break;
+                case 'weight':
+                    weight = +input.value;
+                    break;
+                case 'age':
+                    age = +input.value;
+                    break;
+            }
+            calcTotal();
+        });
+    }
+
+    getDynamicInformation('#height');
+    getDynamicInformation('#weight');
+    getDynamicInformation('#age');
 
    
 
